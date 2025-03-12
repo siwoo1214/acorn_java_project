@@ -14,7 +14,7 @@ public class Main {
 		Scanner sc = new Scanner(System.in);
 		AccountManager o = new AccountManager();
 		StockAccount sa = new StockAccount();
-		EventManage E = new EventManage();
+//		EventManage E = new EventManage();
 		while (true) {
 			if (LoggedInUser == null) {
 				System.out.println("1. 회원가입 2. 로그인 3. 종료");
@@ -54,7 +54,7 @@ public class Main {
 						o.UpdateAccount(sc);
 						break;
 					case 6:
-						E.Event();
+//						E.Event();
 						break;
 					case 7:
 						logout(sc);
