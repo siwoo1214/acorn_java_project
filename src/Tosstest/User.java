@@ -1,18 +1,18 @@
-package Toss;
+package Tosstest;
 
 public class User {
 	public String name;
 	public String id;
 	public String password;
 
-	public User(String name, String id, String password) {
+	public User(String id, String password, String name) {
 		this.name = name;
 		this.id = id;
 		this.password = password;
 	}
 
 	public User() {
-	
+
 	}
 
 	public String getName() {
@@ -37,6 +37,15 @@ public class User {
 
 	public void setPassword(String password) {
 		this.password = password;
+	}
+
+	public String toFileString() {
+		return id + "," + password + "," + name;
+	}
+
+	@Override
+	public String toString() {
+		return "ID: " + id + ", 이름: " + name;
 	}
 
 }

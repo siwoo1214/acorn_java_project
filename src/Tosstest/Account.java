@@ -1,4 +1,4 @@
-package Toss;
+package Tosstest;
 
 public class Account {
 
@@ -30,7 +30,7 @@ public class Account {
 
 	@Override
 	public String toString() {
-		return "계좌 유형: " + accountType + ", 은행명: " + bankname + ", 계좌번호: " + Accountnum + ", 예금주명: " + username
+		return "계좌 유형: " + getAccountType() + ", 은행명: " + bankname + ", 계좌번호: " + Accountnum + ", 예금주명: " + username
 				+ ", 잔액: " + balance;
 	}
 
@@ -73,4 +73,9 @@ public class Account {
 	public void setAccountType(String accountType) {
 		this.accountType = accountType;
 	}
+
+	public String toFileString() {
+		return Accountnum + "," + username + "," + bankname + "," + balance + "," + accountType;
+	}
+
 }

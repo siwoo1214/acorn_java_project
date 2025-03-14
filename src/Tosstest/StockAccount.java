@@ -1,4 +1,4 @@
-package Toss;
+package Tosstest;
 
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -8,12 +8,8 @@ public class StockAccount extends Account {
 	int totalStockValuation = 0; // 보유 주식 총 가치
 	static Scanner sc = new Scanner(System.in);
 
-	public StockAccount(int accountnum, String username, String bankname, int balance) {
-		super(accountnum, username, bankname, balance, "주식 계좌");
-	}
-
-	public StockAccount() {
-
+	public StockAccount(long accountNum, String username, String bankname, int balance) {
+		super(accountNum, username, bankname, balance, "주식 계좌");
 	}
 
 	// 주식 구매
@@ -64,7 +60,7 @@ public class StockAccount extends Account {
 
 					stock.quantity -= num;
 					result += totalSellPrice; // 판매한 만큼 잔액 증가
-					 Main.AccountIn.setBalance(result);
+					Main.AccountIn.setBalance(result);
 
 					System.out.printf("%s 주식 %d주를 개당 %.2f원에 판매하였습니다.\n", name, num, sellPricePerStock);
 					System.out.printf("총 판매 금액: %.2f원\n", totalSellPrice);
@@ -121,4 +117,10 @@ public class StockAccount extends Account {
 			totalStockValuation += stock.pricePerquantity * stock.quantity;
 		}
 	}
+
+	@Override
+	public String toString() {
+		return "주식계좌정보 [ 이름:" + username + ", 계좌번호:" + Accountnum + ", 은행:" + bankname + ", 예치금:" + balance + "원 ]\n";
+	}
+
 }
