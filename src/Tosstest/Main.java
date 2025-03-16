@@ -3,6 +3,7 @@ package Tosstest;
 import Tosstest.GUI.AccountFrame;
 import Tosstest.GUI.LoginFrame;
 
+import java.awt.Component;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.FileReader;
@@ -24,10 +25,19 @@ public class Main {
 	public static List<User> users = new ArrayList<>();
 
 	public static JFrame currentFrame;
+	public static Component pointLabel;
 
 	public static void main(String[] args) {
+
+		// ✅ 프로그램 시작 시 StockManager 초기화
+		new StockManager(); // 가격 변동 시작
+		if (Main.accounts.isEmpty()) { // ✅ 이미 값이 존재하면 다시 불러오지 않음
+			AccountManager.loadAccounts();
+		}
+		AccountManager.setAccountInNull(); // ✅ 초기화
+
 		closeCurrentFrame(); // ✅ 기존 실행 프레임 닫기
-		currentFrame = new LoginFrame(); // ✅ 새로운 프레임 실행
+		currentFrame = new LoginFrame(); // ✅ 로그인 프레임 실행
 	}
 
 	public static void closeCurrentFrame() {
@@ -54,7 +64,6 @@ public class Main {
 			writer.write(user.toFileString()); // ✅ 저장 순서는 User.toFileString()에서 처리됨
 			writer.newLine();
 		} catch (IOException e) {
-			System.out.println("파일 저장 중 오류 발생: " + e.getMessage());
 		}
 	}
 
@@ -73,7 +82,6 @@ public class Main {
 				}
 			}
 		} catch (IOException e) {
-			System.out.println("파일 읽기 중 오류 발생: " + e.getMessage());
 		}
 	}
 
@@ -88,56 +96,54 @@ public class Main {
 		return false;
 	}
 
-	// ✅ 파일 저장 수정
 	public static void saveAccountToFile(Account account) {
-		try (BufferedWriter writer = new BufferedWriter(new FileWriter("res/Account.txt", true))) {
+		try (BufferedWriter writer = new BufferedWriter(new FileWriter("res/Account.txt", true))) { // ✅ 추가 모드로 설정
 			writer.write(account.toFileString());
 			writer.newLine();
+			writer.flush();
 		} catch (IOException e) {
-			System.out.println("파일 저장 중 오류 발생: " + e.getMessage());
 			e.printStackTrace();
 		}
 	}
 
-	// ✅ 파일 읽기 수정
 	public static void loadAccountsFromFile() {
-		accounts.clear();
+		if (!accounts.isEmpty())
+			return; // ✅ 기존 값이 있으면 다시 불러오지 않음
+
 		try (BufferedReader reader = new BufferedReader(new FileReader("res/Account.txt"))) {
 			String line;
 			while ((line = reader.readLine()) != null) {
+				System.out.println("Raw Line: " + line); // ✅ 원본 데이터 출력
+
 				String[] data = line.split(",");
 
-				if (data.length != 5) {
-					System.out.println("오류: 잘못된 데이터 형식 → " + line);
-					continue;
-				}
+				if (data.length == 6) {
+					try {
+						long accountNum = Long.parseLong(data[0].trim());
+						String username = data[1].trim();
+						String bankname = data[2].trim();
+						int balance = Integer.parseInt(data[3].trim());
+						String accountType = data[4].trim();
+						int point = Integer.parseInt(data[5].trim());
 
-				long accountNum;
-				int balance;
+						System.out.println("Account Loaded: " + accountNum + ", " + username);
 
-				try {
-					accountNum = Long.parseLong(data[0]);
-					balance = Integer.parseInt(data[3]);
-				} catch (NumberFormatException e) {
-					System.out.println("오류: 데이터 형식 변환 실패 → " + e.getMessage());
-					continue;
-				}
-
-				String username = data[1];
-				String bank = data[2];
-				String accountType = data[4].trim(); // ✅ trim() 추가 → 공백 제거
-
-				// ✅ AccountType 값이 정확히 읽어지는지 확인 후 처리
-				if ("주식 계좌".equals(accountType)) {
-					StockAccount account = new StockAccount(accountNum, username, bank, balance);
-					accounts.add(account);
-				} else if ("입출금 계좌".equals(accountType)) {
-					BankAccount account = new BankAccount(accountNum, username, bank, balance);
-					accounts.add(account);
+						if ("입출금 계좌".equals(accountType)) {
+							BankAccount account = new BankAccount(accountNum, username, bankname, balance);
+							account.setPoint(point);
+							accounts.add(account);
+						} else if ("주식 계좌".equals(accountType)) {
+							StockAccount account = new StockAccount(accountNum, username, bankname, balance);
+							account.setPoint(0);
+							accounts.add(account);
+						}
+					} catch (NumberFormatException e) {
+						System.out.println("❌ 잘못된 숫자 형식: " + e.getMessage());
+					}
 				}
 			}
 		} catch (IOException e) {
-			e.printStackTrace();
+			System.out.println("❌ 파일 읽기 오류: " + e.getMessage());
 		}
 	}
 
@@ -147,8 +153,6 @@ public class Main {
 			writer.write(history.toFileString());
 			writer.newLine();
 
-			// ✅ 디버깅 코드 추가
-			System.out.println("History 저장 완료 → " + history.toFileString());
 		} catch (IOException e) {
 			System.out.println("파일 저장 중 오류 발생: " + e.getMessage());
 			e.printStackTrace(); // ✅ 오류 추적
@@ -188,5 +192,4 @@ public class Main {
 			e.printStackTrace();
 		}
 	}
-
 }

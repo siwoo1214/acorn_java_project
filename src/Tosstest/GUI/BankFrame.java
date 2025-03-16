@@ -5,7 +5,8 @@ import java.awt.Toolkit;
 
 import javax.swing.*;
 
-import Toss.Main;
+import Tosstest.EventManage;
+import Tosstest.Main;
 
 import java.awt.Image;
 import java.awt.Toolkit;
@@ -59,9 +60,12 @@ public class BankFrame extends JFrame {
 		// ✅ 이벤트 버튼 수정
 		eventButton.addActionListener(e -> {
 			try {
-				new EventFrame();
-				dispose();
+				// ✅ EventManage 인스턴스 생성 후 매개변수로 전달
+				EventManage eventManage = new EventManage(new PointExchangePanel());
+				new EventFrame(eventManage);
+				dispose(); // ✅ 기존 창 닫기
 			} catch (Exception ignored) {
+				ignored.printStackTrace();
 			}
 		});
 

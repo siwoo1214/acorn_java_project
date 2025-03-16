@@ -3,6 +3,7 @@ package Tosstest;
 import java.awt.GridLayout;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.io.FileWriter;
@@ -22,6 +23,7 @@ import Tosstest.GUI.StockFrame;
 public class AccountManager extends Account {
 
 	Scanner sc = new Scanner(System.in);
+	private static ArrayList<Account> accounts = new ArrayList<>();
 
 	public void OpenedAccount() {
 		String username = Main.LoggedInUser.getName();
@@ -71,17 +73,20 @@ public class AccountManager extends Account {
 
 		long AccountNum = (long) (Math.random() * 1000000000);
 
-		// ✅ 계좌 개설 수정
 		if (type.equals("입출금 계좌")) {
-			// ✅ 입출금 계좌는 정확히 BankAccount로 생성
+			// ✅ 입출금 계좌 생성 시 포인트 값 자동 설정
 			BankAccount newAccount = new BankAccount(AccountNum, username, bank, amount);
 			Main.accounts.add(newAccount);
+
+			// ✅ 포인트 값 상태 저장 추가
 			Main.saveAccountToFile(newAccount);
+
 			JOptionPane.showMessageDialog(null, "계좌 개설 완료!\n" + newAccount.toString());
 		} else if (type.equals("주식 계좌")) {
 			StockAccount newAccount = new StockAccount(AccountNum, username, bank, amount);
 			Main.accounts.add(newAccount);
 			Main.saveAccountToFile(newAccount);
+
 			JOptionPane.showMessageDialog(null, "계좌 개설 완료!\n" + newAccount.toString());
 		} else {
 			JOptionPane.showMessageDialog(null, "잘못된 계좌 유형입니다.");
@@ -163,50 +168,54 @@ public class AccountManager extends Account {
 			return;
 		}
 
-		// ✅ 사용자 계좌 목록만 표시
-		String[] accountOptions = userAccounts.stream().map(Account::toString).toArray(String[]::new);
+		// ✅ 사용자 계좌 목록 표시 (개행 문자 제거 및 트리밍)
+		String[] accountOptions = userAccounts.stream().map(account -> account.toString().replace("\n", "").trim())
+				.toArray(String[]::new);
 
 		String selectedAccount = (String) JOptionPane.showInputDialog(null, "해지할 계좌를 선택하세요:", "계좌 해지",
 				JOptionPane.PLAIN_MESSAGE, null, accountOptions, accountOptions[0]);
 
 		if (selectedAccount != null) {
-			// ✅ 선택된 계좌 삭제
+			// ✅ 선택된 계좌 찾기
 			Account removedAccount = null;
 			for (Account account : userAccounts) {
-				if (account.toString().equals(selectedAccount)) {
+				if (selectedAccount.equals(account.toString().replace("\n", "").trim())) {
 					removedAccount = account;
 					break;
 				}
 			}
 
 			if (removedAccount != null) {
-				Main.accounts.remove(removedAccount);
-				JOptionPane.showMessageDialog(null, "계좌가 성공적으로 해지되었습니다!");
+				long targetAccountNum = removedAccount.getAccountnum();
 
-				// ✅ 파일에서 계좌 정보 업데이트
-				updateAccountFile();
+				// ✅ 현재 로그인한 사용자 계좌만 삭제
+				boolean isRemoved = Main.accounts.removeIf(account -> account.getAccountnum() == targetAccountNum
+						&& account.getUsername().equals(Main.LoggedInUser.getName()));
+
+				if (isRemoved) {
+					JOptionPane.showMessageDialog(null, "계좌가 성공적으로 해지되었습니다!");
+					saveAccounts();
+				} else {
+					JOptionPane.showMessageDialog(null, "계좌 삭제에 실패했습니다.");
+				}
 			}
 		}
 	}
 
-	// ✅ 파일에서 계좌 정보 업데이트
-	static void updateAccountFile() {
-		try (BufferedWriter writer = new BufferedWriter(new FileWriter("res/Account.txt"))) {
+	// ✅ 파일 상태 저장 강화
+	public static void updateAccountFile() {
+		try (BufferedWriter writer = new BufferedWriter(new FileWriter("res/Account.txt", false))) { // ✅ 덮어쓰기 모드
 			for (Account account : Main.accounts) {
 				writer.write(account.toFileString());
 				writer.newLine();
 			}
-			JOptionPane.showMessageDialog(null, "파일이 성공적으로 업데이트되었습니다.");
+			writer.flush();
 		} catch (IOException e) {
-			JOptionPane.showMessageDialog(null, "파일 업데이트 중 오류 발생: " + e.getMessage());
 		}
 	}
 
 	public void AccountHistory(Scanner sc) {
-		System.out.println("=== 송금 및 인출 내역 조회 ===");
-
 		if (Main.AccountIn == null) {
-			System.out.println("연결된 계좌가 없습니다.");
 			return;
 		}
 
@@ -232,10 +241,8 @@ public class AccountManager extends Account {
 		}
 
 		if (Main.histories.isEmpty()) {
-			System.out.println("해당 계좌에 송금 및 인출 내역이 없습니다.");
 		} else {
 			for (History h : Main.histories) {
-				System.out.println(h);
 			}
 		}
 	}
@@ -266,7 +273,7 @@ public class AccountManager extends Account {
 		// ✅ 사용자 계좌 목록 표시
 		String[] accountOptions = userAccounts.stream().map(Account::toString).toArray(String[]::new);
 
-		String selectedAccount = (String) JOptionPane.showInputDialog(null, "수정할 계좌를 선택하세요:", "계좌 정보 수정",
+		String selectedAccount = (String) JOptionPane.showInputDialog(null, "수정할 계좌를 선택하세요:", "계좌 수정",
 				JOptionPane.PLAIN_MESSAGE, null, accountOptions, accountOptions[0]);
 
 		if (selectedAccount != null) {
@@ -279,7 +286,7 @@ public class AccountManager extends Account {
 			}
 
 			if (selected != null) {
-				// ✅ 새 은행명 선택 방식으로 수정
+				// ✅ 새 은행명 선택
 				String[] banks = { "신한은행", "우리은행", "하나은행", "IBK기업은행", "KB국민은행" };
 				String newBank = (String) JOptionPane.showInputDialog(null, "새 은행명을 선택하세요:", "은행명 수정",
 						JOptionPane.PLAIN_MESSAGE, null, banks, selected.getBankname());
@@ -300,6 +307,8 @@ public class AccountManager extends Account {
 						int newAmount = Integer.parseInt(newAmountStr);
 						if (newAmount >= 0) {
 							selected.setBalance(newAmount);
+							// ✅ 수정된 계좌 정보 저장
+							AccountManager.updateAccount(selected);
 						} else {
 							JOptionPane.showMessageDialog(null, "금액은 음수일 수 없습니다.");
 							return;
@@ -314,14 +323,100 @@ public class AccountManager extends Account {
 				}
 
 				JOptionPane.showMessageDialog(null, "계좌 정보가 성공적으로 수정되었습니다!");
-
 				// ✅ 파일에서 상태 업데이트
-				updateAccountFile();
+				AccountManager.updateAccount(selected);
 			}
 		}
 	}
 
-	public static void setAccountInNull() {
-		Main.AccountIn = null;
+	public static void updateAccount(Account updatedAccount) {
+		System.out.println(updatedAccount);
+	    for (int i = 0; i < Main.accounts.size(); i++) {
+	        // ✅ 디버그용 출력 추가
+	        System.out.println("Account Number in List: '" + Main.accounts.get(i).getAccountnum() + "'");
+	        System.out.println("Target Account Number: '" + updatedAccount.getAccountnum() + "'");
+
+	        // ✅ 정확히 값이 매칭되도록 trim 적용
+	        if (String.valueOf(Main.accounts.get(i).getAccountnum()).trim()
+	                .equals(String.valueOf(updatedAccount.getAccountnum()).trim())) {
+
+	            System.out.println("✅ Account Matched! Updating...");
+
+	            // ✅ 기존 계좌 정보 수정
+	            Main.accounts.set(i, updatedAccount);
+	            saveAccounts(); // ✅ 수정된 내용 저장
+	            System.out.println("✅ Account Updated and Saved!");
+	            break;
+	        }
+	    }
 	}
+
+
+	public static void saveAccounts() {
+		try (BufferedWriter writer = new BufferedWriter(new FileWriter("res/Account.txt", false))) {
+			for (Account account : Main.accounts) {
+				writer.write(account.toFileString());
+				writer.newLine(); // ✅ 한 줄씩 개행 추가
+			}
+			writer.flush(); // ✅ 버퍼 강제 출력
+			System.out.println("✅ 계좌 정보 저장 완료");
+		} catch (IOException e) {
+			System.out.println("❌ 파일 저장 중 오류 발생: " + e.getMessage());
+			e.printStackTrace();
+		}
+	}
+
+	public static void loadAccounts() {
+		if (!accounts.isEmpty())
+			return;
+
+		try (BufferedReader reader = new BufferedReader(new FileReader("res/Account.txt"))) {
+			String line;
+			while ((line = reader.readLine()) != null) {
+				String[] data = line.split(",");
+
+				if (data.length == 5) {
+					try {
+						long accountNum = Long.parseLong(data[0].trim());
+						String username = data[1].trim();
+						String bankname = data[2].trim();
+						int balance = Integer.parseInt(data[3].trim());
+						String accountType = data[4].trim();
+
+						boolean exists = accounts.stream().anyMatch(acc -> acc.getAccountnum() == accountNum);
+						if (!exists) {
+							if (accountType.equals("입출금 계좌")) {
+								accounts.add(new BankAccount(accountNum, username, bankname, balance));
+							} else {
+								accounts.add(new StockAccount(accountNum, username, bankname, balance));
+							}
+						}
+					} catch (NumberFormatException e) {
+						System.out.println("잘못된 형식: " + e.getMessage());
+					}
+				}
+			}
+		} catch (IOException e) {
+			System.out.println("파일 읽기 오류: " + e.getMessage());
+		}
+	}
+
+	// ✅ 현재 로그인된 사용자 계좌 반환
+	public static Account getAccount(String username) {
+		for (Account account : accounts) {
+			if (account.getUsername().equals(username)) {
+				return account;
+			}
+		}
+		return null;
+	}
+
+	public static ArrayList<Account> getAccounts() {
+		return accounts;
+	}
+
+	public static void setAccountInNull() {
+		Main.AccountIn = null; // ✅ 값 초기화
+	}
+
 }

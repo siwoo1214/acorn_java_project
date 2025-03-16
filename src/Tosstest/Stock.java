@@ -1,64 +1,83 @@
 package Tosstest;
 
+import java.io.*;
+import java.util.Random;
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class Stock {
-	String stockName; // 주식 이름
-	int quantity; // 보유 수량
-	int pricePerquantity; // 구매 시 1주당 가격
-	double sellPrice; // 판매 가격
+	private static final Random random = new Random();
+	private static final Object fileLock = new Object(); // ✅ 동기화 객체
 
-	public Stock(String stockName, int quantity) {
+	private String stockName;
+	private int price;
+
+	public Stock(String stockName, int price) {
 		this.stockName = stockName;
-		this.quantity = quantity;
-		this.pricePerquantity = setBuyPrice(); // 구매 가격 설정
-		this.sellPrice = setSellPrice(); // 판매 가격 설정
-
-		// 10초마다 매도가격 갱신
+		this.price = price;
 		startPriceUpdate();
 	}
 
-	// 매수가 랜덤 설정 
-	private int setBuyPrice() {
-		return (int) (Math.random() * 100000) + 2000;
-	}
-
-	// 매도가격 랜덤 설정 (-10% ~ +10% 변동)
-	private double setSellPrice() {
-		double randomFactor = (Math.random() * 0.2) - 0.1; // -10% ~ +10%
-		return Math.round(pricePerquantity * (1 + randomFactor) * 100) / 100.0; // 소수점 2자리까지 반올림
-	}
-
-	// 새로운 가격을 설정하는 메서드 (판매 후 자동 업데이트)
-	public void updateSellPrice() {
-		this.sellPrice = setSellPrice();
-		System.out.println(this); // 업데이트된 가격 출력
-	}
-
-	// 일정 시간마다 매도가격 갱신
+	// ✅ 3초마다 가격 변동 & 파일 저장 실행 (동일한 주기로 변경)
 	private void startPriceUpdate() {
 		Timer timer = new Timer();
 		timer.schedule(new TimerTask() {
 			@Override
 			public void run() {
-				updateSellPrice(); // 10초마다 가격 갱신
+				updatePrice();
+				saveToFile(); // ✅ 10초마다 가격 변동 후 파일 저장
 			}
-		}, 0, 5000); // 5초마다 실행
+		}, 10000, 10000); // ✅ 10초마다 실행
 	}
 
-	public double getSellPrice() {
-		return sellPrice;
+	// ✅ 가격 변동 (±10%)
+	private void updatePrice() {
+		double changeRate = (random.nextDouble() * 0.2) - 0.1;
+		this.price = (int) Math.round(price * (1 + changeRate));
 	}
 
-	@Override
-	public String toString() {
-		return "주식명: " + stockName + " | 수량: " + quantity + "주 | 매수가: " + pricePerquantity + "원 | 판매가: " + sellPrice
-				+ "원";
+	// ✅ 파일을 동기화하여 업데이트 (쓰기 충돌 방지)
+	private void saveToFile() {
+		synchronized (fileLock) { // ✅ 여러 스레드가 동시에 파일 수정 못하게 동기화
+			File file = new File("res/stocks.txt");
+
+			try (BufferedReader reader = new BufferedReader(new FileReader(file));
+					BufferedWriter writer = new BufferedWriter(new FileWriter("res/stocks_temp.txt"))) {
+
+				String line;
+				while ((line = reader.readLine()) != null) {
+					String[] data = line.split(",");
+
+					if (data.length < 2)
+						continue; // ✅ 데이터 오류 방지
+
+					if (data[0].equals(this.stockName)) {
+						writer.write(this.stockName + "," + this.price + "\n");
+					} else {
+						writer.write(line + "\n");
+					}
+				}
+
+				writer.flush();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+
+			// ✅ 파일 교체 (res/stocks_temp.txt → res/stocks.txt)
+			File originalFile = new File("res/stocks.txt");
+			File tempFile = new File("res/stocks_temp.txt");
+
+			if (originalFile.exists())
+				originalFile.delete();
+			tempFile.renameTo(originalFile);
+		}
 	}
 
-	// 메인 함수 테스트 코드
-	public static void main(String[] args) {
-		Stock stock = new Stock("삼성전자", 10);
+	public String getStockName() {
+		return stockName;
+	}
+
+	public int getPrice() {
+		return price;
 	}
 }
