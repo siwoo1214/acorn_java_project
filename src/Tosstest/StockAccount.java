@@ -29,7 +29,12 @@ public class StockAccount extends Account {
 
 	public boolean buyStock(String stockName, int stockPrice, int quantity) {
 		if (getBalance() < stockPrice * quantity) {
-			return false; // 잔액 부족
+			try {
+				throw new 잔고예외처리();
+			} catch (잔고예외처리 e) {
+				System.out.println("잔고가 부족하여 실행할 수 없습니다");
+				return false; // 잔액 부족
+			}
 		}
 
 		// ✅ 주식을 이미 보유 중이라면 수량 증가 & 매수가 갱신
@@ -58,7 +63,12 @@ public class StockAccount extends Account {
 	// 주식 판매
 	public boolean sellStock(String stockName, int quantity, int sellPrice) {
 		if (!ownedStocks.containsKey(stockName) || ownedStocks.get(stockName) < quantity) {
-			return false; // 주식이 없으면 판매할 수 없고, 보유한 주식보다 많은 수량을 판매할 수 없음
+			try {
+				throw new 주식수량예외처리();
+			} catch (주식수량예외처리 e) {
+				System.out.println("주식의 수량이 부족하여 실행할 수 없습니다");
+			}
+			// 주식이 없으면 판매할 수 없고, 보유한 주식보다 많은 수량을 판매할 수 없음
 		}
 
 		// ✅ 보유 주식 수량 감소

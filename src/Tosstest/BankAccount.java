@@ -12,7 +12,7 @@ public class BankAccount extends Account {
 
 	// 송금
 	public void deposit(String receiverName, long receiverAccountNum, int amount) {
-		if (amount <= 0) {
+		if (amount <= 0 || amount>this.getBalance()) {
 			try {
 				throw new 잔고예외처리();
 			} catch (잔고예외처리 e) {
@@ -31,7 +31,7 @@ public class BankAccount extends Account {
 	}
 
 	public void withdraw(int amount) {
-		if (amount <= 0) {
+		if (amount <= 0 || amount>this.getBalance()) {
 			try {
 				throw new 잔고예외처리();
 			} catch (잔고예외처리 e) {
