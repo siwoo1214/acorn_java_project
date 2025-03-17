@@ -18,7 +18,7 @@ public class Stock {
 		startPriceUpdate();
 	}
 
-	// ✅ 3초마다 가격 변동 & 파일 저장 실행 (동일한 주기로 변경)
+	// ✅ 10초마다 가격 변동 & 파일 저장 실행 (동일한 주기로 변경)
 	private void startPriceUpdate() {
 		Timer timer = new Timer();
 		timer.schedule(new TimerTask() {
@@ -54,7 +54,7 @@ public class Stock {
 					if (data[0].equals(this.stockName)) {
 						writer.write(this.stockName + "," + this.price + "\n");
 					} else {
-						writer.write(line + "\n");
+						writer.write(line + "\n"); 
 					}
 				}
 

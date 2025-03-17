@@ -1,11 +1,17 @@
 package Tosstest;
 
-import java.io.*;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.HashMap;
 
 public class StockAccount extends Account {
-	private HashMap<String, Integer> ownedStocks = new HashMap<>();
-	private HashMap<String, Integer> purchasePrices = new HashMap<>();
+	private HashMap<String, Integer> ownedStocks = new HashMap<>();  //갖고있는 주식목록
+	private HashMap<String, Integer> purchasePrices = new HashMap<>();  //새로 구입한 주식
 
 	public StockAccount(long accountnum, String username, String bankname, int balance) {
 		super(accountnum, username, bankname, balance, "주식 계좌", 0); // ✅ 포인트 값 저장
@@ -17,7 +23,7 @@ public class StockAccount extends Account {
 	    return "주식계좌정보 [ 이름:" + username +
 	           ", 계좌번호:" + Accountnum +
 	           ", 은행:" + bankname +
-	           ", 예치금:" + balance + "원 ]"; // ✅ 개행 제거 및 일관성 강화
+	           ", 예치금:" + balance + "원 ]";
 	}
 
 
@@ -35,12 +41,12 @@ public class StockAccount extends Account {
 			int oldPrice = purchasePrices.get(stockName);
 			int totalCost = (oldPrice * (newQuantity - quantity)) + (stockPrice * quantity);
 			purchasePrices.put(stockName, totalCost / newQuantity);
-		} else {
+		} else {  //아니면 해시맵에 새로운 객체 추가
 			ownedStocks.put(stockName, quantity);
 			purchasePrices.put(stockName, stockPrice);
 		}
 
-		// ✅ 잔액 수정 → setBalance() 호출로 상태 반영
+		// ✅ 잔액 수정 → 구입한 가격을 balance에서 차감하기
 		setBalance(getBalance() - (stockPrice * quantity));
 
 		// ✅ 보유 상태 저장
@@ -49,17 +55,18 @@ public class StockAccount extends Account {
 		return true;
 	}
 
+	// 주식 판매
 	public boolean sellStock(String stockName, int quantity, int sellPrice) {
 		if (!ownedStocks.containsKey(stockName) || ownedStocks.get(stockName) < quantity) {
-			return false; // 보유한 주식보다 많은 수량을 판매할 수 없음
+			return false; // 주식이 없으면 판매할 수 없고, 보유한 주식보다 많은 수량을 판매할 수 없음
 		}
 
 		// ✅ 보유 주식 수량 감소
 		int remainingQuantity = ownedStocks.get(stockName) - quantity;
-		if (remainingQuantity == 0) {
+		if (remainingQuantity == 0) {  //판매하려는 주식이 없으면 해시맵에서 제거
 			ownedStocks.remove(stockName);
 			purchasePrices.remove(stockName);
-		} else {
+		} else {  //아니면 차감된 갯수로 갱신
 			ownedStocks.put(stockName, remainingQuantity);
 		}
 
@@ -68,7 +75,7 @@ public class StockAccount extends Account {
 
 		// ✅ 판매 내역 저장
 		History history = new History(this.getUsername(), this.getAccountnum(), "-", 0, (sellPrice * quantity),
-				java.time.LocalDateTime.now(), "판매");
+				LocalDateTime.now(), "판매");
 		Main.histories.add(history);
 		Main.saveHistoryToFile(history);
 
@@ -96,9 +103,11 @@ public class StockAccount extends Account {
 
 	// ✅ 보유 주식 상태 불러오기
 	private void loadOwnedStocks() {
+		// 해시맵을 비우고 시작
 		ownedStocks.clear();
 		purchasePrices.clear();
 
+		// 로그인된 유저 정보에 맞는 주식해시맵 반환하기 위해서
 		File file = new File("res/" + getUsername() + "_stocks.txt");
 		if (!file.exists())
 			return;
@@ -132,6 +141,7 @@ public class StockAccount extends Account {
 		return purchasePrices.getOrDefault(stockName, -1);
 	}
 
+	//로그인된 계정의 balance를 업데이트
 	@Override
 	public void setBalance(int newBalance) {
 		super.setBalance(newBalance);

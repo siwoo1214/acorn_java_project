@@ -144,6 +144,7 @@ public class AccountManager extends Account {
 		}
 	}
 
+	//계좌 해지
 	public void CancelAccount() {
 		Main.loadAccountsFromFile();
 
@@ -328,7 +329,8 @@ public class AccountManager extends Account {
 			}
 		}
 	}
-
+	
+	//위에서 받아오고 실제로 변경된 정보를 저장하는 메소드
 	public static void updateAccount(Account updatedAccount) {
 		System.out.println(updatedAccount);
 	    for (int i = 0; i < Main.accounts.size(); i++) {
@@ -366,6 +368,8 @@ public class AccountManager extends Account {
 		}
 	}
 
+	
+	//계좌 정보를 불러오는 함수
 	public static void loadAccounts() {
 		if (!accounts.isEmpty())
 			return;

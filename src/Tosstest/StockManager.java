@@ -21,6 +21,14 @@ public class StockManager {
 		startPriceUpdate(); // ✅ 가격 변동 시작
 	}
 
+	// ✅ 기본 주식 데이터 생성 (처음 실행할 때)
+	private static void createDefaultStocks() {
+		stockNames.clear();
+		stockPrices.clear();
+
+		checkAndAddMissingStocks(); // ✅ 20개를 자동 추가하도록 변경
+	}
+
 	// ✅ 30초마다 가격 변동 & 즉시 파일 저장
 	private static void startPriceUpdate() {
 		Timer timer = new Timer();
@@ -29,7 +37,7 @@ public class StockManager {
 			public void run() {
 				updatePrices();
 			}
-		}, 30000, 30000);
+		}, 30000, 30000); // 30초 후에 처음 시작, 이후로 30초마다 갱신되도록
 	}
 
 	// ✅ 가격 변동 (±10%) + 즉시 파일 저장
@@ -91,14 +99,6 @@ public class StockManager {
 		if (modified) {
 			saveStocksToFile(); // ✅ 부족한 주식 추가 후 저장
 		}
-	}
-
-	// ✅ 기본 주식 데이터 생성 (처음 실행할 때)
-	private static void createDefaultStocks() {
-		stockNames.clear();
-		stockPrices.clear();
-
-		checkAndAddMissingStocks(); // ✅ 20개를 자동 추가하도록 변경
 	}
 
 	// ✅ 파일에 주식 데이터 저장

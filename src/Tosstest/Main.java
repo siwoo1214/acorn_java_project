@@ -1,6 +1,5 @@
 package Tosstest;
 
-import Tosstest.GUI.AccountFrame;
 import Tosstest.GUI.LoginFrame;
 
 import java.awt.Component;
@@ -13,7 +12,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.swing.JFrame;
-import javax.swing.JOptionPane;
 
 public class Main {
 
@@ -24,6 +22,7 @@ public class Main {
 	public static List<History> histories = new ArrayList<>();
 	public static List<User> users = new ArrayList<>();
 
+	//Swing사용하기 위한 변수 선언
 	public static JFrame currentFrame;
 	public static Component pointLabel;
 

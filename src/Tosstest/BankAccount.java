@@ -10,9 +10,15 @@ public class BankAccount extends Account {
 		super(accountnum, username, bankname, balance, "입출금 계좌", 10000); // ✅ 포인트 기본값 설정
 	}
 
+	// 송금
 	public void deposit(String receiverName, long receiverAccountNum, int amount) {
 		if (amount <= 0) {
-			return;
+			try {
+				throw new 잔고예외처리();
+			} catch (잔고예외처리 e) {
+				System.out.println("잔고가 부족하여 실행할 수 없습니다");
+				return;
+			}
 		}
 
 		this.setBalance(this.getBalance() - amount);
@@ -25,10 +31,15 @@ public class BankAccount extends Account {
 	}
 
 	public void withdraw(int amount) {
-		if (amount <= 0 || amount > this.getBalance()) {
-			return;
+		if (amount <= 0) {
+			try {
+				throw new 잔고예외처리();
+			} catch (잔고예외처리 e) {
+				System.out.println("잔고가 부족하여 실행할 수 없습니다");
+				return;
+			}
 		}
-
+		
 		this.setBalance(this.getBalance() - amount);
 		History history = new History(this.getUsername(), this.getAccountnum(), "-", 0, amount,
 				java.time.LocalDateTime.now(), "출금");
@@ -38,7 +49,7 @@ public class BankAccount extends Account {
 		AccountManager.updateAccount(this);
 	}
 
-	public void saveHistoryToFile(History history) { // ✅ public으로 수정
+	public void saveHistoryToFile(History history) {
 		try (BufferedWriter writer = new BufferedWriter(new FileWriter("res/History.txt", true))) {
 			writer.write(history.toFileString());
 			writer.newLine();
