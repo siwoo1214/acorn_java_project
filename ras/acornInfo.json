@@ -1,0 +1,100 @@
+{
+   
+  "jiun": {
+    "id": "jiun",
+    "name": "권지언",
+    "password": "12456",
+    "mileage": "bronze"
+  },
+  "mh": {
+    "id": "mh",
+    "name": "김민환",
+    "password": "1234",
+    "mileage": "bronze"
+  },
+  "bsung": {
+    "id": "bsung",
+    "name": "김보성",
+    "password": "1234",
+    "mileage": "bronze"
+  },
+  "min": {
+    "id": "min",
+    "name": "김유민",
+    "password": "222",
+    "mileage": "bronze"
+  },
+  "soo": {
+    "id": "soo",
+    "name": "박수경",
+    "password": "1234",
+    "mileage": "bronze"
+  },
+  "siwoo": {
+    "id": "siwoo",
+    "name": "박시우",
+    "password": "1234",
+    "mileage": "bronze"
+  },
+  "yelin": {
+      "id": "yelin",
+      "name": "박예린",
+      "password": "1234",
+      "mileage": "bronze"
+    },
+  "hyun": {
+    "id": "hyun",
+    "name": "윤현기",
+    "password": "1234",
+    "mileage": "bronze"
+  },
+  "dongwoo": {
+    "id": "dongwoo",
+    "name": "이동우",
+    "password": "1234",
+    "mileage": "bronze"
+  },
+  "sumin": {
+    "id": "sumin",
+    "name": "이수민",
+    "password": "1234",
+    "mileage": "bronze"
+  },
+  "jungho": {
+    "id": "jungho",
+    "name": "이정호",
+    "password": "1234",
+    "mileage": "bronze"
+  }
+  ,
+  "tack": {
+    "id": "tack",
+    "name": "임형택",
+    "password": "1234",
+    "mileage": "bronze"
+  },
+  "yeonsu": {
+    "id": "yeonsu",
+    "name": "정연수",
+    "password": "1234",
+    "mileage": "bronze"
+  },
+  "jitae": {
+    "id": "jitae",
+    "name": "최지태",
+    "password": "1234",
+    "mileage": "bronze"
+  },
+  "ha": {
+    "id": "ha",
+    "name": "최하은",
+    "password": "1234",
+    "mileage": "bronze"
+  },
+  "yeji": {
+    "id": "yeji",
+    "name": "황예지",
+    "password": "1234",
+    "mileage": "bronze"
+  }  
+}
